@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pink Finance Tracker</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 40px auto;
+      background: #fff0f6;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      text-align: center;
+      color: #c2185b;
+      margin-bottom: 10px;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0;
+      gap: 10px;
+    }
+
+    .card {
+      flex: 1;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .income-card { color: green; }
+    .expense-card { color: red; }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 7px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #e91e63;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #c2185b;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 15px;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      margin-bottom: 8px;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .income { border-left: 5px solid green; }
+    .expense { border-left: 5px solid red; }
+
+    .delete {
+      background: none;
+      border: none;
+      color: red;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>💗 Personal Finance Tracker</h2>
+
+  <div class="summary">
+    <div class="card">Balance<br>₹<span id="balance">0</span></div>
+    <div class="card income-card">Income<br>₹<span id="income">0</span></div>
+    <div class="card expense-card">Expense<br>₹<span id="expense">0</span></div>
+  </div>
+
+  <input type="text" id="desc" placeholder="Description">
+  <input type="number" id="amount" placeholder="Amount">
+
+  <select id="category">
+    <option value="Food">Food</option>
+    <option value="Travel">Travel</option>
+    <option value="Rent">Rent</option>
+    <option value="Shopping">Shopping</option>
+    <option value="Other">Other</option>
+  </select>
+
+  <select id="type">
+    <option value="income">Income</option>
+    <option value="expense">Expense</option>
+  </select>
+
+  <button onclick="addTransaction()">Add Transaction</button>
+
+  <ul id="list"></ul>
+</div>
+
+<script>
+  let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+
+  function addTransaction() {
+    const desc = descInput.value;
+    const amount = amountInput.value;
+    const type = typeSelect.value;
+    const category = categorySelect.value;
+
+    if (!desc || !amount) {
+      alert("Fill all fields");
+      return;
+    }
+
+    transactions.push({
+      desc,
+      amount: Number(amount),
+      type,
+      category
+    });
+
+    saveAndRender();
+    descInput.value = "";
+    amountInput.value = "";
+  }
+
+  function deleteTransaction(index) {
+    transactions.splice(index, 1);
+    saveAndRender();
+  }
+
+  function saveAndRender() {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    render();
+  }
+
+  function render() {
+    list.innerHTML = "";
+    let income = 0, expense = 0;
+
+    transactions.forEach((t, i) => {
+      const li = document.createElement("li");
+      li.className = t.type;
+
+      li.innerHTML = `
+        <span>${t.desc} (${t.category}) - ₹${t.amount}</span>
+        <button class="delete" onclick="deleteTransaction(${i})">×</button>
+      `;
+
+      list.appendChild(li);
+
+      t.type === "income" ? income += t.amount : expense += t.amount;
+    });
+
+    incomeEl.innerText = income;
+    expenseEl.innerText = expense;
+    balanceEl.innerText = income - expense;
+  }
+
+  const descInput = document.getElementById("desc");
+  const amountInput = document.getElementById("amount");
+  const typeSelect = document.getElementById("type");
+  const categorySelect = document.getElementById("category");
+
+  const list = document.getElementById("list");
+  const balanceEl = document.getElementById("balance");
+  const incomeEl = document.getElementById("income");
+  const expenseEl = document.getElementById("expense");
+
+  render();
+</script>
+
+</body>
+</html>
